@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.1.0
 
 - feat: add `GET /obsidian?vault=<v>&file=<p>`, answering 302 with the equivalent `obsidian://open` deeplink so a URL Telegram will carry resolves into the vault on the tap. Telegram rejects a `text_link` whose URL uses a custom scheme, so the deeplink cannot be attached to a message directly.
 - feat: percent-encode the emitted `file` with `%20` for spaces rather than `+` — Obsidian does not decode `+` in a query string, so a link built that way opens nothing while looking correct
