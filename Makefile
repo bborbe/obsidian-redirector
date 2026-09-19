@@ -8,10 +8,10 @@ SERVICE = bborbe/obsidian-redirector
 run:
 	@go run -mod=mod main.go \
 	-sentry-dsn="$(shell teamvault-url --teamvault-config ~/.teamvault.json --teamvault-key=${SENTRY_DSN_KEY})" \
-	-listen="localhost:${OBSIDIAN_REDIRECTOR_PORT}" \
-	-kafka-brokers="${KAFKA_BROKERS}" \
-	-datadir="data" \
-	-batch-size="100" \
+	-listen="${LISTEN}" \
+	-public-listen="${PUBLIC_LISTEN}" \
+	-vault-allowlist="${VAULT_ALLOWLIST}" \
+	-file-allowlist="${FILE_ALLOWLIST}" \
 	-v=2
 
 deps:

@@ -28,3 +28,14 @@ func CreateSentryAlertHandler(sentryClient libsentry.Client) http.Handler {
 func CreateHealthzHandler() http.Handler {
 	return handler.NewHealthzHandler()
 }
+
+// CreateObsidianRedirectHandler creates an HTTP handler that converts a
+// Telegram-carriable `https://` request into an `obsidian://open` deeplink.
+// `vaults` and `files` are the allowlist pair that constrains what the handler
+// is willing to emit; an empty allowlist allows nothing.
+func CreateObsidianRedirectHandler(
+	vaults handler.VaultAllowlist,
+	files handler.FileAllowlist,
+) http.Handler {
+	return handler.NewObsidianRedirectHandler(vaults, files)
+}
