@@ -1,5 +1,18 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+Please choose versions by [Semantic Versioning](http://semver.org/).
+
+* MAJOR version when you make incompatible API changes,
+* MINOR version when you add functionality in a backwards-compatible manner, and
+* PATCH version when you make backwards-compatible bug fixes.
+
+## Unreleased
+
+- fix: Correct the copyright year in `pkg/factory/factory.go` from 2025 to 2026, matching the other files this PR touches
+- docs: Add the `LICENSE` file that every source header already references
+
 ## v0.1.0
 
 - feat: add `GET /obsidian?vault=<v>&file=<p>`, answering 302 with the equivalent `obsidian://open` deeplink so a URL Telegram will carry resolves into the vault on the tap. Telegram rejects a `text_link` whose URL uses a custom scheme, so the deeplink cannot be attached to a message directly.
