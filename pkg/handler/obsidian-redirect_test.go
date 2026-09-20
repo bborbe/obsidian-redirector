@@ -220,17 +220,17 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 	Context("ParseFileAllowlist", func() {
 		It("appends a separator to an entry that lacks one", func() {
 			Expect(handler.ParseFileAllowlist("25 Tasks")).
-				To(Equal(handler.FileAllowlist{"25 Tasks/"}))
+				To(Equal([]string{"25 Tasks/"}))
 		})
 
 		It("leaves an entry that already ends in a separator unchanged", func() {
 			Expect(handler.ParseFileAllowlist("25 Tasks/")).
-				To(Equal(handler.FileAllowlist{"25 Tasks/"}))
+				To(Equal([]string{"25 Tasks/"}))
 		})
 
 		It("normalises every entry in a mixed list", func() {
 			Expect(handler.ParseFileAllowlist("25 Tasks,tasks/,24 Goals")).
-				To(Equal(handler.FileAllowlist{"25 Tasks/", "tasks/", "24 Goals/"}))
+				To(Equal([]string{"25 Tasks/", "tasks/", "24 Goals/"}))
 		})
 
 		It("returns an empty list for empty input, which allows nothing", func() {

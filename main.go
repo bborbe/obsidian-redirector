@@ -84,7 +84,7 @@ func (a *application) createAdminHTTPServer(sentryClient libsentry.Client) run.F
 func (a *application) createPublicHTTPServer() run.Func {
 	return func(ctx context.Context) error {
 		vaults := handler.VaultAllowlist(handler.ParseAllowlist(a.VaultAllowlist))
-		files := handler.ParseFileAllowlist(a.FileAllowlist)
+		files := handler.FileAllowlist(handler.ParseFileAllowlist(a.FileAllowlist))
 
 		// An empty allowlist allows nothing — the handler fails closed, so a
 		// missing configuration rejects every request rather than permitting

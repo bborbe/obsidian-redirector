@@ -78,9 +78,9 @@ const filePrefixSeparator = "/"
 // would admit `tasksExtra/`. Normalising inside ParseAllowlist instead would
 // stamp the separator onto vault names, and VaultAllowlist.Contains is exact
 // membership, so every request would be rejected.
-func ParseFileAllowlist(value string) FileAllowlist {
+func ParseFileAllowlist(value string) []string {
 	entries := ParseAllowlist(value)
-	result := make(FileAllowlist, 0, len(entries))
+	result := make([]string, 0, len(entries))
 	for _, entry := range entries {
 		result = append(result, ensureFilePrefix(entry))
 	}
