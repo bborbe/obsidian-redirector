@@ -8,7 +8,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
-## Unreleased
+## v0.1.1
 
 - fix: Correct the copyright year in `pkg/factory/factory.go` from 2025 to 2026, matching the other files this PR touches
 - docs: Add the `LICENSE` file that every source header already references
