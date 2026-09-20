@@ -63,6 +63,40 @@ func ParseAllowlist(value string) []string {
 	return result
 }
 
+// filePrefixSeparator is the separator vault-relative file entries use. It is
+// hard-coded rather than taken from os.PathSeparator because these are Obsidian
+// vault paths, which are always slash-separated regardless of the host OS.
+const filePrefixSeparator = "/"
+
+// ParseFileAllowlist splits a comma-separated configuration value into the path
+// prefixes a `file` value may fall under, normalising every entry to end in a
+// separator.
+//
+// It is a separate seam from ParseAllowlist on purpose. FileAllowlist.Contains
+// is a prefix match, so an entry without a trailing separator widens the match
+// into any sibling whose name merely starts with the same characters — `tasks`
+// would admit `tasksExtra/`. Normalising inside ParseAllowlist instead would
+// stamp the separator onto vault names, and VaultAllowlist.Contains is exact
+// membership, so every request would be rejected.
+func ParseFileAllowlist(value string) FileAllowlist {
+	entries := ParseAllowlist(value)
+	result := make(FileAllowlist, 0, len(entries))
+	for _, entry := range entries {
+		result = append(result, ensureFilePrefix(entry))
+	}
+	return result
+}
+
+// ensureFilePrefix returns entry with a trailing separator, so a prefix match
+// cannot spill into a sibling directory whose name merely shares its opening
+// characters. "25 Tasks" and "25 Tasks/" both yield "25 Tasks/".
+func ensureFilePrefix(entry string) string {
+	if strings.HasSuffix(entry, filePrefixSeparator) {
+		return entry
+	}
+	return entry + filePrefixSeparator
+}
+
 // NewObsidianRedirectHandler creates an HTTP handler that answers
 // `GET /obsidian?vault=<v>&file=<p>` with a 302 whose Location is the
 // equivalent `obsidian://open` deeplink.

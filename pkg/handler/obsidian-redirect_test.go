@@ -216,4 +216,61 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 			Expect(handler.ParseAllowlist("")).To(BeEmpty())
 		})
 	})
+
+	Context("ParseFileAllowlist", func() {
+		It("appends a separator to an entry that lacks one", func() {
+			Expect(handler.ParseFileAllowlist("25 Tasks")).
+				To(Equal(handler.FileAllowlist{"25 Tasks/"}))
+		})
+
+		It("leaves an entry that already ends in a separator unchanged", func() {
+			Expect(handler.ParseFileAllowlist("25 Tasks/")).
+				To(Equal(handler.FileAllowlist{"25 Tasks/"}))
+		})
+
+		It("normalises every entry in a mixed list", func() {
+			Expect(handler.ParseFileAllowlist("25 Tasks,tasks/,24 Goals")).
+				To(Equal(handler.FileAllowlist{"25 Tasks/", "tasks/", "24 Goals/"}))
+		})
+
+		It("returns an empty list for empty input, which allows nothing", func() {
+			Expect(handler.ParseFileAllowlist("")).To(BeEmpty())
+		})
+	})
+
+	Context("the file allowlist boundary", func() {
+		// The prefix match is only a directory boundary because of the trailing
+		// separator. The entry below is deliberately written WITHOUT one, so
+		// these specs fail if normalisation is removed: `25 Tasks` would then
+		// admit `25 TasksExtra/x.md`, and a future FILE_ALLOWLIST entry typed
+		// without the slash would silently widen the allowlist.
+		var boundaryHandler http.Handler
+
+		BeforeEach(func() {
+			boundaryHandler = handler.NewObsidianRedirectHandler(
+				handler.VaultAllowlist{"Personal"},
+				handler.ParseFileAllowlist("25 Tasks"),
+			)
+		})
+
+		boundaryRequest := func(rawQuery string) *httptest.ResponseRecorder {
+			req := httptest.NewRequest("GET", "/obsidian?"+rawQuery, nil)
+			resp := httptest.NewRecorder()
+			boundaryHandler.ServeHTTP(resp, req)
+			return resp
+		}
+
+		It("rejects a sibling directory whose name shares the prefix", func() {
+			resp := boundaryRequest("vault=Personal&file=25%20TasksExtra%2Fx.md")
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Header().Get("Location")).To(BeEmpty())
+		})
+
+		It("accepts a path inside the prefix", func() {
+			resp := boundaryRequest("vault=Personal&file=25%20Tasks%2Fx.md")
+			Expect(resp.Code).To(Equal(http.StatusFound))
+			Expect(resp.Header().Get("Location")).
+				To(Equal("obsidian://open?vault=Personal&file=25%20Tasks%2Fx.md"))
+		})
+	})
 })

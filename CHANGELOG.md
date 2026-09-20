@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- fix: normalise the file-prefix allowlist so an entry written without a trailing `/` cannot widen the match. `FileAllowlist.Contains` is a prefix match, so `25 Tasks` also admitted `25 TasksExtra/x.md`; the boundary was previously held only by the convention that every configured entry happens to end in a separator. Normalisation lives in a new `ParseFileAllowlist` seam rather than in `ParseAllowlist`, which is shared with the vault list — appending `/` there would stamp it onto vault names and, since `VaultAllowlist.Contains` is exact membership, reject every request
+
 ## v0.1.1
 
 - fix: Correct the copyright year in `pkg/factory/factory.go` from 2025 to 2026, matching the other files this PR touches
