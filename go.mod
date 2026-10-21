@@ -1,6 +1,6 @@
 module github.com/bborbe/obsidian-redirector
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/bborbe/errors v1.6.3
@@ -8,10 +8,10 @@ require (
 	github.com/bborbe/log v1.7.4
 	github.com/bborbe/metrics v0.6.7
 	github.com/bborbe/run v1.11.2
-	github.com/bborbe/sentry v1.10.4
-	github.com/bborbe/service v1.10.16
-	github.com/bborbe/time v1.27.16
-	github.com/bborbe/validation v1.5.4
+	github.com/bborbe/sentry v1.10.5
+	github.com/bborbe/service v1.11.0
+	github.com/bborbe/time v1.27.17
+	github.com/bborbe/validation v1.5.5
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/golang/glog v1.2.5
 	github.com/gorilla/mux v1.8.1
