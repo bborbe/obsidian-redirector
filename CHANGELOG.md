@@ -11,6 +11,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 - chore: dispatch `make build` between the local buildx arm and a cluster Job arm via `BUILD_TARGET`, pinning the local build clock to the built commit for reproducibility
+- chore: vendor the five cluster build runner files under `hack/` from `agent-task-executor` and `go-skeleton`, each pinned to a full commit SHA
 
 ## v0.1.12
 

@@ -1,8 +1,13 @@
 ---
-status: approved
+status: completed
 spec: [001-cluster-build-arm]
+summary: Vendored the five pinned cluster build runner files under hack/ and added an Unreleased changelog entry; all hashes, syntax checks, and make precommit pass.
+execution_id: 5f72f751-9f28-5382-8ed4-54fa711781b0-exec-002-spec-001-hack-build-cluster-files
+dark-factory-version: dev
 created: "2026-11-09T17:55:00Z"
 queued: "2026-11-09T17:06:01Z"
+started: "2026-11-09T17:11:44Z"
+completed: "2026-11-09T17:12:47Z"
 branch: dark-factory/cluster-build-arm
 ---
 
