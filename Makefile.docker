@@ -15,6 +15,14 @@ BUILD_TIMEOUT ?= 3600
 override REPO_URL := https://github.com/bborbe/obsidian-redirector.git
 override PUSH_SECRET := buildkit-push
 
+# The cluster arm's push target is composed from these two, so they are pinned
+# for the same reason as REPO_URL: `make build BUILD_TARGET=<cluster>
+# DOCKER_REGISTRY=<other>` would otherwise move where the credential-bearing Job
+# pushes. `override` also beats the later `include example.env`, which assigns
+# DOCKER_REGISTRY with a plain `export`.
+override DOCKER_REGISTRY := docker.io
+override SERVICE := bborbe/obsidian-redirector
+
 # Build clock pinned to the built commit instead of the wall clock, so two
 # builds of the same commit can produce the same image.
 SOURCE_DATE_EPOCH ?= $(shell git log -1 --format=%ct)

