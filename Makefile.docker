@@ -7,11 +7,13 @@ BUILD_TARGET ?= local
 BUILD_NAMESPACE ?= build
 BUILD_TIMEOUT ?= 3600
 
-# Assigned with `:=` (literal), never `?=`: these flow into a Job that mounts
-# a push credential, and a command-line override would let a caller point that
-# credential-bearing Job at an arbitrary repository.
-REPO_URL := https://github.com/bborbe/obsidian-redirector.git
-PUSH_SECRET := buildkit-push
+# `override` is load-bearing here, not decoration. A plain `:=` is overridden by
+# a command-line assignment in GNU make, so `make build REPO_URL=<any repo>`
+# would repoint this push-credential-bearing Job at an arbitrary repository —
+# measured, not assumed. `override` is the only assignment form a caller cannot
+# beat, so both values are pinned with it.
+override REPO_URL := https://github.com/bborbe/obsidian-redirector.git
+override PUSH_SECRET := buildkit-push
 
 # Build clock pinned to the built commit instead of the wall clock, so two
 # builds of the same commit can produce the same image.
