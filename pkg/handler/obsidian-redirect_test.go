@@ -38,6 +38,12 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 			Expect(resp.Code).To(Equal(http.StatusFound))
 		})
 
+		It("marks the redirect as non-cacheable", func() {
+			resp := request("vault=Personal&file=25%20Tasks%2FMy%20Note")
+			Expect(resp.Code).To(Equal(http.StatusFound))
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
+		})
+
 		It("emits a Location that is byte-for-byte the encoded deeplink", func() {
 			resp := request("vault=Personal&file=25%20Tasks%2FMy%20Note")
 			// Asserted on the RAW header. Parsing it through url.ParseQuery
@@ -82,24 +88,28 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 			resp := request("vault=NotMyVault&file=25%20Tasks%2FMy%20Note")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Header().Get("Location")).To(BeEmpty())
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects a file outside the path allowlist with 400", func() {
 			resp := request("vault=Personal&file=99%20Elsewhere%2FSecret")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Header().Get("Location")).To(BeEmpty())
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects a file that traverses upward with 400", func() {
 			resp := request("vault=Personal&file=25%20Tasks%2F..%2F..%2Fetc%2Fpasswd")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Header().Get("Location")).To(BeEmpty())
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects an absolute file with 400", func() {
 			resp := request("vault=Personal&file=%2Fetc%2Fpasswd")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Header().Get("Location")).To(BeEmpty())
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It(
@@ -115,22 +125,26 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 				)
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				Expect(resp.Header().Get("Location")).To(BeEmpty())
+				Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 			},
 		)
 
 		It("rejects a vault containing CRLF", func() {
 			resp := request("vault=Personal%0d%0aX%3A%20y&file=25%20Tasks%2FMy%20Note")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects a missing vault with 400", func() {
 			resp := request("file=25%20Tasks%2FMy%20Note")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects a missing file with 400", func() {
 			resp := request("vault=Personal")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 
 		It("rejects a url parameter outright with 400", func() {
@@ -141,6 +155,7 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 			)
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Header().Get("Location")).To(BeEmpty())
+			Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"))
 		})
 	})
 
@@ -175,8 +190,11 @@ var _ = Describe("ObsidianRedirectHandler", func() {
 
 		It("returns a rejection status for every hostile input", func() {
 			for _, query := range hostileQueries {
-				Expect(request(query).Code).To(Equal(http.StatusBadRequest),
+				resp := request(query)
+				Expect(resp.Code).To(Equal(http.StatusBadRequest),
 					"query %q was not rejected", query)
+				Expect(resp.Result().Header.Get("Cache-Control")).To(Equal("no-store"),
+					"query %q was not marked non-cacheable", query)
 			}
 		})
 	})

@@ -19,6 +19,11 @@ import (
 // rather than a variable so no code path can widen it at runtime.
 const obsidianScheme = "obsidian://open"
 
+// cacheControlNoStore is the Cache-Control directive applied to every
+// /obsidian response. The redirect target is a per-request allowlist decision,
+// so no intermediary may replay the answer for a different request.
+const cacheControlNoStore = "no-store"
+
 // VaultAllowlist is the set of Obsidian vault names this redirector will emit
 // targets for. Without it a caller could name any vault, and the emitted
 // deeplink would be built from an unvalidated value.
@@ -141,6 +146,7 @@ func NewObsidianRedirectHandler(
 		// http.Redirect parses and re-serialises the target, and the criterion
 		// here is that the emitted Location is byte-for-byte the encoded
 		// deeplink. Writing it verbatim removes that re-encoding step entirely.
+		resp.Header().Set("Cache-Control", cacheControlNoStore)
 		resp.Header().Set("Location", target)
 		resp.WriteHeader(http.StatusFound)
 	})
@@ -150,6 +156,7 @@ func NewObsidianRedirectHandler(
 // must never be silently swallowed: a client that receives 200 from a rejected
 // request would treat a broken link as a delivered one.
 func writeRejection(resp http.ResponseWriter, message string) {
+	resp.Header().Set("Cache-Control", cacheControlNoStore)
 	resp.WriteHeader(http.StatusBadRequest)
 	if _, err := resp.Write([]byte(message)); err != nil {
 		glog.V(2).Infof("write rejection response failed: %v", err)
