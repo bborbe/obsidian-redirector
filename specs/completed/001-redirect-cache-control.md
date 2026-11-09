@@ -1,8 +1,10 @@
 ---
-status: prompted
+status: completed
 approved: "2026-11-09T00:46:24Z"
 generating: "2026-11-09T01:59:19Z"
 prompted: "2026-11-09T02:03:15Z"
+verifying: "2026-11-09T02:15:28Z"
+completed: "2026-11-09T02:15:33Z"
 branch: dark-factory/redirect-cache-control
 ---
 
