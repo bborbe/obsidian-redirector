@@ -25,7 +25,10 @@ GET /obsidian?vault=<v>&file=<p>  →  302  Location: obsidian://open?vault=<v>&
 `docker.io/bborbe/obsidian-redirector:<branch>` (the checked-out branch with `/`
 replaced by `-`). The local build runs through `docker buildx build` with
 `rewrite-timestamp` clamped to the built commit, so two builds of one commit
-produce the same image.
+produce the same image — **provided the active buildx builder is the `docker`
+driver** (`docker buildx ls`, the `*` row). A `docker-container` builder is a
+separate build cache; on it the same recipe silently produces a different image
+per run.
 
 To build inside a Kubernetes cluster instead — unattended, from a committed ref —
 pass a cluster alias or kubectl context and a tag:
@@ -36,17 +39,21 @@ make build BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>
 
 The cluster arm renders a Kubernetes Job, waits for it, and pushes
 `docker.io/bborbe/obsidian-redirector:<tag>` from inside the cluster. `VERSION`
-has no default: the build refuses unless you pass it. `REF` must be a full
-40-character commit SHA that exists on `origin`, because the Job clones the
-repository at that ref.
+has no default: the build refuses unless you supply it on the command line or in
+the environment. `REF` must be a full 40-character commit SHA that exists on
+`origin`, because the Job clones the repository at that ref.
 
-`buca` is the deploy command: `make buca` builds locally, pushes, cleans the
-local image, and applies the manifests. For a cluster build use
-`make buca BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>`; the local push and
-cleanup steps are skipped because the image is pushed from inside the cluster.
+`buca` is the deploy command. For a cluster build use
+`make buca BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>`; the local `upload`
+and `clean` steps are skipped because the image is pushed from inside the
+cluster. Note that `make buca` does **not** apply manifests in this repo — its
+`apply` target iterates component subdirectories and there are none here; the
+deployment is applied from `bborbe/nuke`.
 
 Before the first cluster build against a cluster, run the bootstrap once (it is
-idempotent; it creates the `build` namespace and the `buildkit-push` secret):
+idempotent; it creates the `build` namespace and the `buildkit-push` secret). It
+needs `teamvault-cli` on `PATH` and a teamvault config (`TEAMVAULT`, default
+`~/.config/teamvault-cli/config.json`):
 
 ```bash
 hack/build-cluster-bootstrap.sh <cluster>

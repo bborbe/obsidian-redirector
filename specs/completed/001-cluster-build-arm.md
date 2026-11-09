@@ -5,7 +5,7 @@ generating: "2026-11-09T16:39:52Z"
 prompted: "2026-11-09T16:53:29Z"
 verifying: "2026-11-09T17:13:47Z"
 completed: "2026-11-09T17:13:54Z"
-branch: dark-factory/cluster-build-arm
+branch: feat/cluster-build-arm
 ---
 
 ## Summary

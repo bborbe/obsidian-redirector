@@ -10,9 +10,7 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- feat: add a cluster build arm so the image can be built unattended from any committed ref, and move the local arm to `docker buildx build` so two builds of one commit produce the same image
-- chore: dispatch `make build` between the local buildx arm and a cluster Job arm via `BUILD_TARGET`, pinning the local build clock to the built commit for reproducibility
-- chore: vendor the five cluster build runner files under `hack/` from `agent-task-executor` and `go-skeleton`, each pinned to a full commit SHA
+- feat: add a cluster build arm — `make build BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>` builds a committed ref as a Kubernetes Job and pushes `docker.io/bborbe/obsidian-redirector` — and move the local arm to `docker buildx build` so two builds of one commit produce the same image. The five `hack/` runners are vendored from `agent-task-executor` at `d3d6e9b779f55ba4b4f9a9f03bceab2fa46d1e40` and `go-skeleton` at `eb050aa20bb6194d8af7e47baf8880df789bd1ca`.
 
 ## v0.1.12
 
