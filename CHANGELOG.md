@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- feat: add a cluster build arm — `make build BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>` builds a committed ref as a Kubernetes Job and pushes `docker.io/bborbe/obsidian-redirector` — and move the local arm to `docker buildx build` so two builds of one commit produce the same image. The five `hack/` runners are vendored from `agent-task-executor` at `d3d6e9b779f55ba4b4f9a9f03bceab2fa46d1e40` and `go-skeleton` at `eb050aa20bb6194d8af7e47baf8880df789bd1ca`.
+
 ## v0.1.12
 
 - chore(dark-factory): use the direct workflow without PR delivery, the shape that completes on this repo

@@ -1,27 +1,77 @@
 DIRS += $(shell find */* -maxdepth 0 -name Makefile -exec dirname "{}" \;)
 
+# BUILD_TARGET selects where `make build` runs. `local` (the default) uses the
+# local Docker daemon; any other value must name a kubectl context and builds
+# inside that cluster as a Job rendered from hack/build-job.yaml.
+BUILD_TARGET ?= local
+BUILD_NAMESPACE ?= build
+BUILD_TIMEOUT ?= 3600
+
+# `override` is load-bearing here, not decoration. A plain `:=` is overridden by
+# a command-line assignment in GNU make, so `make build REPO_URL=<any repo>`
+# would repoint this push-credential-bearing Job at an arbitrary repository —
+# measured, not assumed. `override` is the only assignment form a caller cannot
+# beat, so both values are pinned with it.
+override REPO_URL := https://github.com/bborbe/obsidian-redirector.git
+override PUSH_SECRET := buildkit-push
+
+# The cluster arm's push target is composed from these two, so they are pinned
+# for the same reason as REPO_URL: `make build BUILD_TARGET=<cluster>
+# DOCKER_REGISTRY=<other>` would otherwise move where the credential-bearing Job
+# pushes. `override` also beats the later `include example.env`, which assigns
+# DOCKER_REGISTRY with a plain `export`.
+override DOCKER_REGISTRY := docker.io
+override SERVICE := bborbe/obsidian-redirector
+
+# Build clock pinned to the built commit instead of the wall clock, so two
+# builds of the same commit can produce the same image.
+SOURCE_DATE_EPOCH ?= $(shell git log -1 --format=%ct)
+BUILD_DATE ?= $(shell git log -1 --format=%cI)
+
 .PHONY: build
 build:
-	DOCKER_BUILDKIT=1 \
-	docker build \
-	--rm=true \
+ifeq ($(BUILD_TARGET),local)
+	docker buildx build \
 	--platform=linux/amd64 \
+	--provenance=false \
+	--sbom=false \
 	--build-arg DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
 	--build-arg BRANCH=$(BRANCH) \
 	--build-arg BUILD_GIT_VERSION=$$(git describe --tags --always --dirty) \
 	--build-arg BUILD_GIT_COMMIT=$$(git rev-parse --short HEAD) \
-	--build-arg BUILD_DATE=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	--build-arg BUILD_DATE=$(BUILD_DATE) \
+	--build-arg SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) \
 	-t $(DOCKER_REGISTRY)/$(SERVICE):$(BRANCH) \
-	-f Dockerfile .
+	-f Dockerfile . \
+	--output type=docker,rewrite-timestamp=true,unpack=false
+else
+ifeq ($(filter file undefined,$(origin VERSION)),$(origin VERSION))
+$(error VERSION is required for a cluster build; pass VERSION=<tag> on the make command line)
+endif
+	BUILD_TARGET='$(BUILD_TARGET)' \
+	NAMESPACE='$(BUILD_NAMESPACE)' \
+	REPO_URL='$(REPO_URL)' \
+	REF='$(REF)' \
+	TAG='$(VERSION)' \
+	IMAGE='$(DOCKER_REGISTRY)/$(SERVICE)' \
+	PUSH='true' \
+	PUSH_SECRET='$(PUSH_SECRET)' \
+	TIMEOUT='$(BUILD_TIMEOUT)' \
+	hack/build-cluster.sh
+endif
 
 .PHONY: upload
 upload:
+ifeq ($(BUILD_TARGET),local)
 	docker push $(DOCKER_REGISTRY)/$(SERVICE):$(BRANCH)
+endif
 
 .PHONY: clean
 clean:
+ifeq ($(BUILD_TARGET),local)
 	docker rmi $(DOCKER_REGISTRY)/$(SERVICE):$(BRANCH) || true
 	docker builder prune --max-used-space 21474836480 -f || true
+endif
 
 .PHONY: apply
 apply:
