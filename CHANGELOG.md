@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- chore(dark-factory): use the direct workflow without PR delivery, the shape that completes on this repo
+
 ## v0.1.11
 
 - chore(dark-factory): worktree workflow with PR delivery
