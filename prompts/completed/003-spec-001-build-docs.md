@@ -1,8 +1,13 @@
 ---
-status: approved
+status: completed
 spec: [001-cluster-build-arm]
+summary: Documented the local and cluster build arms in README.md and added the unreleased feat entry to CHANGELOG.md.
+execution_id: 5f72f751-9f28-5382-8ed4-54fa711781b0-exec-003-spec-001-build-docs
+dark-factory-version: dev
 created: "2026-11-09T17:55:00Z"
 queued: "2026-11-09T17:11:18Z"
+started: "2026-11-09T17:12:49Z"
+completed: "2026-11-09T17:13:47Z"
 branch: dark-factory/cluster-build-arm
 ---
 
