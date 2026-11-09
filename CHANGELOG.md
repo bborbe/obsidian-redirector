@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- fix: Mark every `/obsidian` response with `Cache-Control: no-store` so a shared cache cannot replay a redirect target that was validated for one request or keep serving it after an allowlist change
+
 ## v0.1.11
 
 - chore(dark-factory): worktree workflow with PR delivery
