@@ -8,6 +8,10 @@ Please choose versions by [Semantic Versioning](http://semver.org/).
 * MINOR version when you add functionality in a backwards-compatible manner, and
 * PATCH version when you make backwards-compatible bug fixes.
 
+## Unreleased
+
+- chore: update github.com/bborbe/http to v1.26.33, github.com/bborbe/log to v1.7.8, github.com/bborbe/metrics to v0.6.11, github.com/bborbe/run to v1.11.11, github.com/bborbe/service to v1.11.3, github.com/bborbe/time to v1.27.27, github.com/bborbe/validation to v1.5.9
+
 ## v0.2.0
 
 - feat: add a cluster build arm — `make build BUILD_TARGET=<cluster> REF=<sha> VERSION=<tag>` builds a committed ref as a Kubernetes Job and pushes `docker.io/bborbe/obsidian-redirector` — and move the local arm to `docker buildx build` so two builds of one commit produce the same image. The five `hack/` runners are vendored from `agent-task-executor` at `d3d6e9b779f55ba4b4f9a9f03bceab2fa46d1e40` and `go-skeleton` at `eb050aa20bb6194d8af7e47baf8880df789bd1ca`.
